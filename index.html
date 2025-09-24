@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Código de Barras - MELI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://www.woosync.io/wp-content/uploads/2022/02/3-Trucos-para-vender-mas-por-Internet-e-incrementar-ventas.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      padding: 30px 40px;
+      width: 450px;
+      max-width: 90%;
+      text-align: center;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .meli-logo {
+      height: 40px;
+    }
+
+    .switch-wrapper {
+      display: flex;
+      align-items: center;
+      font-size: 0.9em;
+      gap: 8px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+      border-radius: 34px;
+      background-color: #f5f5f5;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input:checked + .slider {
+      background-color: #ffdd00;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(30px);
+    }
+
+    .lang-label {
+      font-weight: bold;
+    }
+
+    h2 {
+      font-size: 1.4em;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .underline {
+      height: 4px;
+      width: 60px;
+      background-color: #ffdd00;
+      margin: 0 auto 20px auto;
+      border-radius: 2px;
+    }
+
+    label {
+      display: block;
+      font-size: 1em;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    button {
+      border: none;
+      padding: 12px 20px;
+      font-size: 1em;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+
+    #submitBtn {
+      background-color: #ffdd00;
+    }
+
+    #submitBtn:hover {
+      background-color: #fddc00cc;
+    }
+
+    #printBtn {
+      background-color: #ffdd00;
+    }
+
+    #backBtn {
+      background-color: #ddd;
+    }
+
+    #resultContainer {
+      display: none;
+    }
+
+    #result img {
+      max-width: 100%;
+    }
+
+    @media print {
+      #printBtn, #backBtn, .switch-wrapper, .header, .underline, #title {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img id="meliLogo" src="https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo.png" alt="MercadoLibre Logo" class="meli-logo">
+      </div>
+      <div class="switch-wrapper">
+        <span class="lang-label">ES</span>
+        <label class="switch">
+          <input type="checkbox" id="langToggle">
+          <span class="slider"></span>
+        </label>
+        <span class="lang-label">PT</span>
+      </div>
+    </div>
+
+    <h2 id="title"></h2>
+    <div class="underline"></div>
+
+    <div id="formContainer">
+      <form id="barcodeForm">
+        <label for="mac" id="macLabel">
+          Ingresar MAC Bluetooth<br>
+          <span style="font-size: 0.9em; color: #555;">(desde navegador ChromeOS: chrome://bluetooth-internals)</span>
+        </label>
+        <input type="text" id="mac" name="mac" placeholder="Ej: AABBCC112233" required>
+        <button type="submit" id="submitBtn">Generar Código</button>
+      </form>
+    </div>
+
+    <div id="resultContainer">
+      <div id="result"></div>
+      <button id="printBtn" onclick="window.print()">Imprimir</button>
+      <button id="backBtn" onclick="goBack()">Volver</button>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+      es: {
+        title: "<span style='color:#0073e6; font-weight:bold;'>SHIPPING MELI</span><br>Generador de Código de Barras",
+        macLabel: "Ingresar MAC Bluetooth<br><span style='font-size: 0.9em; color: #555;'>(Obtenido desde navegador ChromeOS: chrome://bluetooth-internals)</span>",
+        placeholder: "Ej: AABBCC112233",
+        submitBtn: "Generar Código",
+        alert: "Por favor ingresa una MAC válida",
+        logo: "https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo.png",
+        print: "Imprimir Código",
+        back: "Volver"
+      },
+      pt: {
+        title: "<span style='color:#0073e6; font-weight:bold;'>SHIPPING MELI</span><br>Gerador de Código de Barras",
+        macLabel: "Inserir MAC Bluetooth<br><span style='font-size: 0.9em; color: #555;'>(Extraído do navegador ChromeOS: chrome://bluetooth-internals)</span>",
+        placeholder: "Ex: AABBCC112233",
+        submitBtn: "Gerar Código",
+        alert: "Por favor, insira um MAC válido",
+        logo: "https://upload.wikimedia.org/wikipedia/pt/0/04/Logotipo_MercadoLivre.png",
+        print: "Imprimir Código",
+        back: "Voltar"
+      }
+    };
+
+    let currentLang = 'es';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.getElementById('title').innerHTML = translations[lang].title;
+      document.getElementById('macLabel').innerHTML = translations[lang].macLabel;
+      document.getElementById('mac').placeholder = translations[lang].placeholder;
+      document.getElementById('submitBtn').innerText = translations[lang].submitBtn;
+      document.getElementById('printBtn').innerText = translations[lang].print;
+      document.getElementById('backBtn').innerText = translations[lang].back;
+      document.getElementById('meliLogo').src = translations[lang].logo;
+    }
+
+    document.getElementById('langToggle').addEventListener('change', function () {
+      setLanguage(this.checked ? 'pt' : 'es');
+    });
+
+    setLanguage(currentLang);
+
+    document.getElementById("barcodeForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const mac = document.getElementById("mac").value.trim();
+      if (!mac) {
+        alert(translations[currentLang].alert);
+        return;
+      }
+
+      const prefix = "\\<FNC3>PH11A";
+      const dataToEncode = prefix + mac;
+      const encodedData = encodeURIComponent(dataToEncode);
+
+      const barcodeURL = "https://barcode.tec-it.com/barcode.ashx?data=" + encodedData + "&code=Code128&translate-esc=on";
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = `
+        <img src="${barcodeURL}" alt="Código de Barras">
+      `;
+
+      document.getElementById("formContainer").style.display = "none";
+      document.getElementById("resultContainer").style.display = "block";
+    });
+
+    function goBack() {
+      document.getElementById("formContainer").style.display = "block";
+      document.getElementById("resultContainer").style.display = "none";
+      document.getElementById("barcodeForm").reset();
+    }
+  </script>
+</body>
+</html>
