@@ -303,15 +303,13 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
 
-    #versionActions {
-      display: flex;
-      gap: 10px;
+    .warn-box {
+      background: #ffe6e6;
+      border: 1px solid #f3c2c2;
+      color: #8a1f1f;
+      padding: 8px 12px;
+      border-radius: 8px;
       margin-top: 8px;
-      flex-wrap: wrap;
-    }
-
-    #updateChromeBtn {
-      background-color: #ffdd00;
     }
 
     #resultContainer {
@@ -354,9 +352,7 @@
       <button type="button" id="startBarcodeBtn"><i class="fas fa-barcode"></i> Generar Barcode Bluetooth</button>
       <div id="browserVersion" class="browser-version">
         <span id="browserVersionLabel"></span>
-        <div id="versionActions" style="display:none;">
-          <button type="button" id="updateChromeBtn">Actualizar Chrome</button>
-        </div>
+        <div id="versionWarn" class="warn-box" style="display:none;">Por Favor: Actualizar ChromeOS desde Settings</div>
       </div>
     </div>
 
@@ -536,7 +532,6 @@
       setTextIfExists('closeImageBtn', translations[lang].close);
       const bv = document.getElementById('browserVersionLabel');
       if (bv) bv.innerText = getBrowserVersionLabel(lang);
-      setTextIfExists('updateChromeBtn', translations[lang].updateChrome);
       setPlaceholderIfExists('mac', translations[lang].placeholder);
       setTextIfExists('submitBtn', translations[lang].submitBtn);
       setTextIfExists('openBluetoothBtn', translations[lang].openBluetooth);
@@ -600,12 +595,12 @@
     // Inicializa rótulo de versión en landing
     const bv = document.getElementById('browserVersionLabel');
     if (bv) bv.innerText = getBrowserVersionLabel(currentLang);
-    // Mostrar botón de actualizar si versión < 140
+    // Mostrar advertencia si versión < 140
     try {
       const version = detectChromeVersion();
       const major = parseInt((version.match(/^(\d+)/) || [,'0'])[1], 10);
-      const actions = document.getElementById('versionActions');
-      if (actions) actions.style.display = (!isNaN(major) && major < 140) ? 'flex' : 'none';
+      const warn = document.getElementById('versionWarn');
+      if (warn) warn.style.display = (!isNaN(major) && major < 140) ? 'block' : 'none';
     } catch (e) {}
 
     // Navegación entre pantallas
@@ -667,25 +662,7 @@
       const modal = document.getElementById('configImageModal');
       if (modal) modal.style.display = 'none';
     }
-    const updateChromeBtn = document.getElementById('updateChromeBtn');
-    if (updateChromeBtn) updateChromeBtn.addEventListener('click', function(){
-      // Abrimos un popup auxiliar con instrucciones y botón para navegar
-      const url = 'chrome://os-settings';
-      let win = null;
-      try { win = window.open('', 'osSettingsPopup', 'popup=yes,width=900,height=680'); } catch (e) { win = null; }
-      if (!win) {
-        alert(currentLang === 'pt' ? 'Habilite pop-ups e tente novamente.' : 'Habilita ventanas emergentes y vuelve a intentar.');
-        return;
-      }
-      const title = (currentLang === 'pt') ? 'Configurações do ChromeOS' : 'Configuración de ChromeOS';
-      const openLabel = (currentLang === 'pt') ? 'Abrir agora' : 'Abrir ahora';
-      const copyLabel = (currentLang === 'pt') ? 'Copiar link' : 'Copiar enlace';
-      const hint = (currentLang === 'pt')
-        ? 'Clique em Abrir agora. Se não funcionar, copie o link e cole na barra de endereços e pressione Enter.'
-        : 'Haz clic en Abrir ahora. Si no funciona, copia el enlace y pégalo en la barra de direcciones y presiona Enter.';
-      const html = `<!DOCTYPE html><html lang="${currentLang}"><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px}h2{margin:0 0 10px 0}.row{margin:14px 0}button{border:none;padding:10px 14px;font-size:1em;border-radius:10px;cursor:pointer;background:#ffdd00;font-weight:bold;margin-right:8px}code{background:#f7f7f7;border:1px solid #e0e0e0;border-radius:8px;padding:6px 8px;display:inline-block}</style></head><body><h2>${title}</h2><div class="row">${hint}</div><div class="row"><button id="go">${openLabel}</button><button id="copy">${copyLabel}</button></div><div class="row"><code>${url}</code></div><script>document.getElementById('go').addEventListener('click',function(){try{location.href='${url}';}catch(e){}});document.getElementById('copy').addEventListener('click',async function(){try{await navigator.clipboard.writeText('${url}');}catch(e){}});<\/script></body></html>`;
-      try { win.document.open(); win.document.write(html); win.document.close(); } catch (e) {}
-    });
+    // Se removió el botón/acciones; solo mostramos advertencia
     const backToHomeFromFormBtn = document.getElementById('backToHomeFromFormBtn');
     if (backToHomeFromFormBtn) backToHomeFromFormBtn.addEventListener('click', function(){ try{ document.getElementById('barcodeForm').reset(); }catch(e){} showHome(); });
 
