@@ -561,8 +561,10 @@
     // Detecta idioma inicial del navegador y ajusta el toggle
     function detectInitialLanguage() {
       try {
-        const navLang = ((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase();
-        return navLang && navLang.startsWith('pt') ? 'pt' : 'es';
+        const langs = (navigator.languages || []).map(l => (l || '').toLowerCase());
+        const primary = (navigator.language || '').toLowerCase();
+        if (langs.some(l => l.startsWith('pt')) || primary.startsWith('pt')) return 'pt';
+        return 'es';
       } catch (e) { return 'es'; }
     }
 
