@@ -524,6 +524,7 @@
 
     function setLanguage(lang) {
       currentLang = lang;
+      try { localStorage.setItem('lang', currentLang); } catch (e) {}
       setHTMLIfExists('homeTitle', translations[lang].homeTitle);
       setHTMLIfExists('title', translations[lang].title);
       setHTMLIfExists('macLabel', translations[lang].macLabel);
@@ -568,7 +569,17 @@
       } catch (e) { return 'es'; }
     }
 
-    currentLang = detectInitialLanguage();
+    // Preferir preferencia guardada si existe
+    try {
+      const savedLang = localStorage.getItem('lang');
+      if (savedLang === 'pt' || savedLang === 'es') {
+        currentLang = savedLang;
+      } else {
+        currentLang = detectInitialLanguage();
+      }
+    } catch (e) {
+      currentLang = detectInitialLanguage();
+    }
     try { document.getElementById('langToggle').checked = (currentLang === 'pt'); } catch (e) {}
 
     function detectChromeVersion() {
