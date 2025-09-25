@@ -669,14 +669,22 @@
     }
     const updateChromeBtn = document.getElementById('updateChromeBtn');
     if (updateChromeBtn) updateChromeBtn.addEventListener('click', function(){
-      // Intento de abrir os-settings; puede estar bloqueado por el navegador
-      try {
-        const w = window.open('chrome://os-settings', '_blank');
-        if (!w) {
-          // Fallback: intentar en la misma pestaña
-          window.location.href = 'chrome://os-settings';
-        }
-      } catch (e) {}
+      // Abrimos un popup auxiliar con instrucciones y botón para navegar
+      const url = 'chrome://os-settings';
+      let win = null;
+      try { win = window.open('', 'osSettingsPopup', 'popup=yes,width=900,height=680'); } catch (e) { win = null; }
+      if (!win) {
+        alert(currentLang === 'pt' ? 'Habilite pop-ups e tente novamente.' : 'Habilita ventanas emergentes y vuelve a intentar.');
+        return;
+      }
+      const title = (currentLang === 'pt') ? 'Configurações do ChromeOS' : 'Configuración de ChromeOS';
+      const openLabel = (currentLang === 'pt') ? 'Abrir agora' : 'Abrir ahora';
+      const copyLabel = (currentLang === 'pt') ? 'Copiar link' : 'Copiar enlace';
+      const hint = (currentLang === 'pt')
+        ? 'Clique em Abrir agora. Se não funcionar, copie o link e cole na barra de endereços e pressione Enter.'
+        : 'Haz clic en Abrir ahora. Si no funciona, copia el enlace y pégalo en la barra de direcciones y presiona Enter.';
+      const html = `<!DOCTYPE html><html lang="${currentLang}"><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px}h2{margin:0 0 10px 0}.row{margin:14px 0}button{border:none;padding:10px 14px;font-size:1em;border-radius:10px;cursor:pointer;background:#ffdd00;font-weight:bold;margin-right:8px}code{background:#f7f7f7;border:1px solid #e0e0e0;border-radius:8px;padding:6px 8px;display:inline-block}</style></head><body><h2>${title}</h2><div class="row">${hint}</div><div class="row"><button id="go">${openLabel}</button><button id="copy">${copyLabel}</button></div><div class="row"><code>${url}</code></div><script>document.getElementById('go').addEventListener('click',function(){try{location.href='${url}';}catch(e){}});document.getElementById('copy').addEventListener('click',async function(){try{await navigator.clipboard.writeText('${url}');}catch(e){}});<\/script></body></html>`;
+      try { win.document.open(); win.document.write(html); win.document.close(); } catch (e) {}
     });
     const backToHomeFromFormBtn = document.getElementById('backToHomeFromFormBtn');
     if (backToHomeFromFormBtn) backToHomeFromFormBtn.addEventListener('click', function(){ try{ document.getElementById('barcodeForm').reset(); }catch(e){} showHome(); });
