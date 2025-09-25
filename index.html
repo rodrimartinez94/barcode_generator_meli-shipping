@@ -554,6 +554,17 @@
       setLanguage(this.checked ? 'pt' : 'es');
     });
 
+    // Detecta idioma inicial del navegador y ajusta el toggle
+    function detectInitialLanguage() {
+      try {
+        const navLang = ((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase();
+        return navLang && navLang.startsWith('pt') ? 'pt' : 'es';
+      } catch (e) { return 'es'; }
+    }
+
+    currentLang = detectInitialLanguage();
+    try { document.getElementById('langToggle').checked = (currentLang === 'pt'); } catch (e) {}
+
     function detectChromeVersion() {
       try {
         const ua = navigator.userAgent || '';
