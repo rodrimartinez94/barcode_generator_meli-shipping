@@ -352,7 +352,7 @@
       <button type="button" id="startBarcodeBtn"><i class="fas fa-barcode"></i> Generar Barcode Bluetooth</button>
       <div id="browserVersion" class="browser-version">
         <span id="browserVersionLabel"></span>
-        <div id="versionWarn" class="warn-box" style="display:none;">Por Favor: Actualizar ChromeOS desde Settings</div>
+        <div id="versionWarn" class="warn-box" style="display:none;">Actualizar ChromeOS desde Settings</div>
       </div>
     </div>
 
@@ -455,7 +455,8 @@
         logo: "https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo.png",
         print: "Imprimir Código",
         back: "Volver",
-        updateChrome: "Actualizar Chrome"
+        updateChrome: "Actualizar Chrome",
+        updateWarn: "Actualizar ChromeOS desde Settings"
       },
       pt: {
         homeTitle: "<span style='color:#0073e6; font-weight:bold;'>SHIPPING MELI</span><br>Processo do Ring Scanner RS5100",
@@ -482,7 +483,8 @@
         logo: "https://upload.wikimedia.org/wikipedia/pt/0/04/Logotipo_MercadoLivre.png",
         print: "Imprimir Código",
         back: "Voltar",
-        updateChrome: "Atualizar o Chrome"
+        updateChrome: "Atualizar o Chrome",
+        updateWarn: "Atualize o ChromeOS nas Configurações"
       }
     };
 
@@ -532,6 +534,7 @@
       setTextIfExists('closeImageBtn', translations[lang].close);
       const bv = document.getElementById('browserVersionLabel');
       if (bv) bv.innerText = getBrowserVersionLabel(lang);
+      setTextIfExists('versionWarn', translations[lang].updateWarn);
       setPlaceholderIfExists('mac', translations[lang].placeholder);
       setTextIfExists('submitBtn', translations[lang].submitBtn);
       setTextIfExists('openBluetoothBtn', translations[lang].openBluetooth);
