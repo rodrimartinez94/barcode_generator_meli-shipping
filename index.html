@@ -394,6 +394,7 @@
           <div id="copyFeedback" style="font-size:0.9em; color:#2e7d32; display:none;">Enlace copiado</div>
           <div class="modal-actions">
             <button type="button" id="openNewTabBtn" onclick="openNewTab()">Abrir una nueva pestaña</button>
+            <button type="button" id="modalBackBtn" style="background:#ddd;" onclick="closeBluetoothModal()">Volver</button>
           </div>
         </div>
       </div>
@@ -444,6 +445,7 @@
         bluetoothTitle: "Obtener MAC Bluetooth de ChromeOS",
         copyLink: "Copiar enlace",
         openNewTab: "Abrir una nueva pestaña",
+        modalBack: "Volver",
         openImage: "Ver Códigos de Configuración",
         imageTitle: "Códigos de configuración",
         close: "Cerrar",
@@ -472,6 +474,7 @@
         bluetoothTitle: "Obter MAC Bluetooth do ChromeOS",
         copyLink: "Copiar link",
         openNewTab: "Abrir uma nova aba",
+        modalBack: "Voltar",
         openImage: "Ver Códigos de Configuração",
         imageTitle: "Códigos de configuração",
         close: "Fechar",
@@ -528,6 +531,7 @@
       setTextIfExists('bluetoothTitle', translations[lang].bluetoothTitle);
       setTextIfExists('copyLinkBtn', translations[lang].copyLink);
       setTextIfExists('openNewTabBtn', translations[lang].openNewTab);
+      setTextIfExists('modalBackBtn', translations[lang].modalBack);
       setHTMLIfExists('configIntro', translations[lang].configIntro);
       setTextIfExists('openImageBtn', translations[lang].openImage);
       setTextIfExists('configImageTitle', translations[lang].imageTitle);
@@ -715,6 +719,8 @@
     function openNewTab() {
       try {
         window.open('about:blank', '_blank');
+        // Al abrir, cerramos el modal para volver atrás automáticamente
+        closeBluetoothModal();
       } catch (e) {}
     }
 
