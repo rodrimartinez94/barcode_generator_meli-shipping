@@ -669,8 +669,14 @@
     }
     const updateChromeBtn = document.getElementById('updateChromeBtn');
     if (updateChromeBtn) updateChromeBtn.addEventListener('click', function(){
-      // Intento de abrir os-settings; puede estar bloqueado, según navegador
-      try { window.open('chrome://os-settings/help/about', '_blank'); } catch (e) {}
+      // Intento de abrir os-settings; puede estar bloqueado por el navegador
+      try {
+        const w = window.open('chrome://os-settings', '_blank');
+        if (!w) {
+          // Fallback: intentar en la misma pestaña
+          window.location.href = 'chrome://os-settings';
+        }
+      } catch (e) {}
     });
     const backToHomeFromFormBtn = document.getElementById('backToHomeFromFormBtn');
     if (backToHomeFromFormBtn) backToHomeFromFormBtn.addEventListener('click', function(){ try{ document.getElementById('barcodeForm').reset(); }catch(e){} showHome(); });
