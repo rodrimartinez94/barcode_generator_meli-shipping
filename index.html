@@ -303,6 +303,17 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
 
+    #versionActions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    #updateChromeBtn {
+      background-color: #ffdd00;
+    }
+
     #resultContainer {
       display: none;
     }
@@ -341,7 +352,12 @@
     <div id="landingContainer">
       <button type="button" id="configBtn">⚙️ Configuración inicial</button>
       <button type="button" id="startBarcodeBtn"><i class="fas fa-barcode"></i> Generar Barcode Bluetooth</button>
-      <div id="browserVersion" class="browser-version"></div>
+      <div id="browserVersion" class="browser-version">
+        <span id="browserVersionLabel"></span>
+        <div id="versionActions" style="display:none;">
+          <button type="button" id="updateChromeBtn">Actualizar Chrome</button>
+        </div>
+      </div>
     </div>
 
     <!-- Título para flujo de código de barras -->
@@ -442,7 +458,8 @@
         alert: "Por favor ingresa una MAC válida",
         logo: "https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo.png",
         print: "Imprimir Código",
-        back: "Volver"
+        back: "Volver",
+        updateChrome: "Actualizar Chrome"
       },
       pt: {
         homeTitle: "<span style='color:#0073e6; font-weight:bold;'>SHIPPING MELI</span><br>Processo do Ring Scanner RS5100",
@@ -468,7 +485,8 @@
         alert: "Por favor, insira um MAC válido",
         logo: "https://upload.wikimedia.org/wikipedia/pt/0/04/Logotipo_MercadoLivre.png",
         print: "Imprimir Código",
-        back: "Voltar"
+        back: "Voltar",
+        updateChrome: "Atualizar o Chrome"
       }
     };
 
@@ -516,8 +534,9 @@
       setTextIfExists('openImageBtn', translations[lang].openImage);
       setTextIfExists('configImageTitle', translations[lang].imageTitle);
       setTextIfExists('closeImageBtn', translations[lang].close);
-      const bv = document.getElementById('browserVersion');
+      const bv = document.getElementById('browserVersionLabel');
       if (bv) bv.innerText = getBrowserVersionLabel(lang);
+      setTextIfExists('updateChromeBtn', translations[lang].updateChrome);
       setPlaceholderIfExists('mac', translations[lang].placeholder);
       setTextIfExists('submitBtn', translations[lang].submitBtn);
       setTextIfExists('openBluetoothBtn', translations[lang].openBluetooth);
@@ -579,8 +598,15 @@
 
     setLanguage(currentLang);
     // Inicializa rótulo de versión en landing
-    const bv = document.getElementById('browserVersion');
+    const bv = document.getElementById('browserVersionLabel');
     if (bv) bv.innerText = getBrowserVersionLabel(currentLang);
+    // Mostrar botón de actualizar si versión < 140
+    try {
+      const version = detectChromeVersion();
+      const major = parseInt((version.match(/^(\d+)/) || [,'0'])[1], 10);
+      const actions = document.getElementById('versionActions');
+      if (actions) actions.style.display = (!isNaN(major) && major < 140) ? 'flex' : 'none';
+    } catch (e) {}
 
     // Navegación entre pantallas
     function showHome() {
@@ -641,6 +667,11 @@
       const modal = document.getElementById('configImageModal');
       if (modal) modal.style.display = 'none';
     }
+    const updateChromeBtn = document.getElementById('updateChromeBtn');
+    if (updateChromeBtn) updateChromeBtn.addEventListener('click', function(){
+      // Intento de abrir os-settings; puede estar bloqueado, según navegador
+      try { window.open('chrome://os-settings/help/about', '_blank'); } catch (e) {}
+    });
     const backToHomeFromFormBtn = document.getElementById('backToHomeFromFormBtn');
     if (backToHomeFromFormBtn) backToHomeFromFormBtn.addEventListener('click', function(){ try{ document.getElementById('barcodeForm').reset(); }catch(e){} showHome(); });
 
