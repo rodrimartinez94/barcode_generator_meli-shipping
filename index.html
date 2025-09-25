@@ -408,7 +408,12 @@
         - Si el firmware del Ring es <strong>MELI</strong>, deberá escanear los códigos del <strong>1 al 4</strong> en orden.<br>
         - Si el firmware del Ring es <strong>GLOBAL</strong>, deberá escanear únicamente el <strong>código 4</strong>.
       </div>
-      <button type="button" id="openImageBtn" style="background:#ffdd00;">Ver Códigos de Configuración</button>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+        <button type="button" id="barcode1Btn" style="background:#ffdd00;">BarCode 1</button>
+        <button type="button" id="barcode2Btn" style="background:#ffdd00;">BarCode 2</button>
+        <button type="button" id="barcode3Btn" style="background:#ffdd00;">BarCode 3</button>
+        <button type="button" id="barcode4Btn" style="background:#ffdd00;">BarCode 4</button>
+      </div>
       <button type="button" id="backToHomeBtn" style="background:#ddd;">Volver</button>
     </div>
 
@@ -683,11 +688,23 @@
     if (startBarcodeBtn) startBarcodeBtn.addEventListener('click', showBarcodeForm);
     const backToHomeBtn = document.getElementById('backToHomeBtn');
     if (backToHomeBtn) backToHomeBtn.addEventListener('click', showHome);
-    const openImageBtn = document.getElementById('openImageBtn');
-    if (openImageBtn) openImageBtn.addEventListener('click', function(){
+    function showCodeImage(src) {
       const modal = document.getElementById('configImageModal');
-      if (modal) modal.style.display = 'flex';
-    });
+      const img = document.getElementById('configImageFull');
+      if (modal && img) {
+        img.src = src;
+        modal.style.display = 'flex';
+      }
+    }
+
+    const barcode1Btn = document.getElementById('barcode1Btn');
+    if (barcode1Btn) barcode1Btn.addEventListener('click', function(){ showCodeImage('code1.png'); });
+    const barcode2Btn = document.getElementById('barcode2Btn');
+    if (barcode2Btn) barcode2Btn.addEventListener('click', function(){ showCodeImage('code2.png'); });
+    const barcode3Btn = document.getElementById('barcode3Btn');
+    if (barcode3Btn) barcode3Btn.addEventListener('click', function(){ showCodeImage('code3.png'); });
+    const barcode4Btn = document.getElementById('barcode4Btn');
+    if (barcode4Btn) barcode4Btn.addEventListener('click', function(){ showCodeImage('code4.png'); });
 
     function closeConfigImageModal() {
       const modal = document.getElementById('configImageModal');
