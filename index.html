@@ -323,9 +323,9 @@
     /* Logo pequeño tipo ícono sobre el código */
 
     .result-logo {
-      display: flex;
+      display: none;
       justify-content: center;
-      margin: 4px 0 10px 0;
+      margin: 4px 0 2px 0;
     }
 
     .logo-print {
@@ -337,6 +337,10 @@
     @media print {
       #printBtn, #backBtn, #openBluetoothBtn, #bluetoothModal, #configImageModal, .switch-wrapper, .header, .underline, #title {
         display: none !important;
+      }
+      .result-logo {
+        display: flex !important;
+        margin: 4px 0 2px 0;
       }
       .logo-print {
         width: 256px;
