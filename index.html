@@ -329,14 +329,18 @@
     }
 
     .logo-print {
-      width: 40px;
-      height: 40px;
+      width: 256px;
+      height: 256px;
       object-fit: contain;
     }
 
     @media print {
       #printBtn, #backBtn, #openBluetoothBtn, #bluetoothModal, #configImageModal, .switch-wrapper, .header, .underline, #title {
         display: none !important;
+      }
+      .logo-print {
+        width: 256px;
+        height: 256px;
       }
     }
   </style>
