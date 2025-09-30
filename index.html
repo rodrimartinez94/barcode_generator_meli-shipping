@@ -320,6 +320,40 @@
       max-width: 100%;
     }
 
+    /* Bloques que se imprimen encima del código de barras */
+    .print-meta {
+      font-weight: bold;
+      margin: 6px 0 10px 0;
+      text-align: left;
+    }
+
+    .print-log {
+      margin: 6px 0 12px 0;
+      text-align: left;
+    }
+
+    .print-log pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 8px;
+      max-height: 40vh;
+      overflow: auto;
+    }
+
+    .result-logo {
+      display: flex;
+      justify-content: center;
+      margin: 4px 0 10px 0;
+    }
+
+    .logo-print {
+      max-width: 200px;
+      height: auto;
+    }
+
     @media print {
       #printBtn, #backBtn, #openBluetoothBtn, #bluetoothModal, #configImageModal, .switch-wrapper, .header, .underline, #title {
         display: none !important;
@@ -462,8 +496,8 @@
         logo: "https://logodownload.org/wp-content/uploads/2018/10/mercado-libre-logo.png",
         print: "Imprimir Código",
         back: "Volver",
-        updateChrome: "Actualizar ChromeOS",
-        updateWarn: "Actualizar ChromeOS desde Settings"
+        updateChrome: "Actualizar Chrome",
+        updateWarn: "Actualizar ChromeOS desde Settings",
       },
       pt: {
         homeTitle: "<span style='color:#0073e6; font-weight:bold;'>SHIPPING MELI</span><br>Processo do Ring Scanner RS5100",
@@ -491,8 +525,8 @@
         logo: "https://upload.wikimedia.org/wikipedia/pt/0/04/Logotipo_MercadoLivre.png",
         print: "Imprimir Código",
         back: "Voltar",
-        updateChrome: "Atualizar o ChromeOS",
-        updateWarn: "Atualize o ChromeOS nas Configurações"
+        updateChrome: "Atualizar o Chrome",
+        updateWarn: "Atualize o ChromeOS nas Configurações",
       }
     };
 
@@ -527,12 +561,39 @@
       if (el) el.alt = alt;
     }
 
+    function escapeHTML(unsafe) {
+      try {
+        return String(unsafe)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      } catch (e) {
+        return '';
+      }
+    }
+
+    async function getManagedDeviceSerial() {
+      try {
+        const devAttrs = window.chrome && chrome.enterprise && chrome.enterprise.deviceAttributes;
+        if (devAttrs && typeof devAttrs.getDeviceSerialNumber === 'function') {
+          return await new Promise(resolve => {
+            try { devAttrs.getDeviceSerialNumber(sn => resolve((sn || '').trim())); }
+            catch (e) { resolve(''); }
+          });
+        }
+      } catch (e) {}
+      return '';
+    }
+
     function setLanguage(lang) {
       currentLang = lang;
       try { localStorage.setItem('lang', currentLang); } catch (e) {}
       setHTMLIfExists('homeTitle', translations[lang].homeTitle);
       setHTMLIfExists('title', translations[lang].title);
       setHTMLIfExists('macLabel', translations[lang].macLabel);
+      // campos removidos del formulario (serial/log); sólo mantenemos etiquetas de referencia por compatibilidad
       setHTMLIfExists('bluetoothInstructions', translations[lang].bluetoothInstructions);
       setTextIfExists('bluetoothTitle', translations[lang].bluetoothTitle);
       setTextIfExists('copyLinkBtn', translations[lang].copyLink);
@@ -611,7 +672,7 @@
 
     function getBrowserVersionLabel(lang) {
       const version = detectChromeVersion();
-      if (!version) return lang === 'pt' ? 'Versão do ChromeOS: desconhecida' : 'Versión de ChromeOS: desconocida';
+      if (!version) return lang === 'pt' ? 'Versão do Chrome: desconhecida' : 'Versión de Chrome: desconocida';
       // Si las subversiones están ocultas (ej. 140.0.0.0), mostrar solo la principal
       let display = version;
       try {
@@ -624,7 +685,7 @@
           if (s2 === '0' && s3 === '0' && s4 === '0') display = major;
         }
       } catch (e) {}
-      return lang === 'pt' ? `Versão do ChromeOS: ${display}` : `Versión de ChromeOS: ${display}`;
+      return lang === 'pt' ? `Versão do Chrome: ${display}` : `Versión de Chrome: ${display}`;
     }
 
     setLanguage(currentLang);
@@ -763,7 +824,7 @@
 
     document.getElementById('openBluetoothBtn').addEventListener('click', onOpenBluetoothClick);
 
-    document.getElementById("barcodeForm").addEventListener("submit", function(event) {
+    document.getElementById("barcodeForm").addEventListener("submit", async function(event) {
       event.preventDefault();
       const macRaw = document.getElementById("mac").value.trim();
       if (!macRaw) {
@@ -778,6 +839,40 @@
         return;
       }
 
+      // Detectar Serial/Hostname automáticamente
+      function getAnyParam(names) {
+        try {
+          const lowerNames = names.map(n => String(n || '').toLowerCase());
+          const out = {};
+          const capture = (text) => {
+            if (!text) return;
+            const q = text.replace(/^([?#])/, '');
+            if (!q) return;
+            q.split('&').forEach(pair => {
+              if (!pair) return;
+              const [k,v] = pair.split('=');
+              const key = decodeURIComponent((k || '').trim()).toLowerCase();
+              const val = decodeURIComponent((v || '').trim());
+              if (key && (val || val === '')) out[key] = val;
+            });
+          };
+          capture(window.location.search);
+          capture(window.location.hash);
+          for (const name of lowerNames) {
+            if (Object.prototype.hasOwnProperty.call(out, name)) {
+              const candidate = String(out[name] || '').trim();
+              if (candidate) return candidate;
+            }
+          }
+          return '';
+        } catch (e) { return ''; }
+      }
+      const serialFromQuery = getAnyParam(['sn','serial','serialnumber','hostname','host','name','device','asset']);
+      const host = (window.location.hostname || '').toLowerCase();
+      const hostIsService = /(?:^|\.)googleusercontent\.com$/.test(host);
+      const serialAuto = serialFromQuery || (host && !hostIsService ? host : '');
+      const serial = serialAuto || 'N/A';
+
       const prefix = "\\<FNC3>PH11A";
       const dataToEncode = prefix + macClean;
       const encodedData = encodeURIComponent(dataToEncode);
@@ -785,7 +880,13 @@
       const barcodeURL = "https://barcode.tec-it.com/barcode.ashx?data=" + encodedData + "&code=Code128&translate-esc=on";
 
       const resultDiv = document.getElementById("result");
+      let metaHtml = '';
+      // Logo de Internal Systems desde el repositorio (ajusta URL si es necesario)
+      const logoUrl = 'Logo Internal Systems-01.png';
+      metaHtml += `<div class=\"result-logo\"><img class=\"logo-print\" src=\"${logoUrl}\" alt=\"Internal Systems\"></div>`;
+      metaHtml += `<div class=\"print-meta\">SN/HostName: ${escapeHTML(serial)}</div>`;
       resultDiv.innerHTML = `
+        ${metaHtml}
         <img src="${barcodeURL}" alt="Código de Barras">
       `;
 
