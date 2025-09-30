@@ -320,28 +320,7 @@
       max-width: 100%;
     }
 
-    /* Bloques que se imprimen encima del código de barras */
-    .print-meta {
-      font-weight: bold;
-      margin: 6px 0 10px 0;
-      text-align: left;
-    }
-
-    .print-log {
-      margin: 6px 0 12px 0;
-      text-align: left;
-    }
-
-    .print-log pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: #f9f9f9;
-      border: 1px solid #eee;
-      padding: 10px;
-      border-radius: 8px;
-      max-height: 40vh;
-      overflow: auto;
-    }
+    /* Logo pequeño tipo ícono sobre el código */
 
     .result-logo {
       display: flex;
@@ -350,8 +329,9 @@
     }
 
     .logo-print {
-      max-width: 200px;
-      height: auto;
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
     }
 
     @media print {
@@ -839,40 +819,6 @@
         return;
       }
 
-      // Detectar Serial/Hostname automáticamente
-      function getAnyParam(names) {
-        try {
-          const lowerNames = names.map(n => String(n || '').toLowerCase());
-          const out = {};
-          const capture = (text) => {
-            if (!text) return;
-            const q = text.replace(/^([?#])/, '');
-            if (!q) return;
-            q.split('&').forEach(pair => {
-              if (!pair) return;
-              const [k,v] = pair.split('=');
-              const key = decodeURIComponent((k || '').trim()).toLowerCase();
-              const val = decodeURIComponent((v || '').trim());
-              if (key && (val || val === '')) out[key] = val;
-            });
-          };
-          capture(window.location.search);
-          capture(window.location.hash);
-          for (const name of lowerNames) {
-            if (Object.prototype.hasOwnProperty.call(out, name)) {
-              const candidate = String(out[name] || '').trim();
-              if (candidate) return candidate;
-            }
-          }
-          return '';
-        } catch (e) { return ''; }
-      }
-      const serialFromQuery = getAnyParam(['sn','serial','serialnumber','hostname','host','name','device','asset']);
-      const host = (window.location.hostname || '').toLowerCase();
-      const hostIsService = /(?:^|\.)googleusercontent\.com$/.test(host);
-      const serialAuto = serialFromQuery || (host && !hostIsService ? host : '');
-      const serial = serialAuto || 'N/A';
-
       const prefix = "\\<FNC3>PH11A";
       const dataToEncode = prefix + macClean;
       const encodedData = encodeURIComponent(dataToEncode);
@@ -884,7 +830,6 @@
       // Logo de Internal Systems desde el repositorio (ajusta URL si es necesario)
       const logoUrl = 'Logo Internal Systems-01.png';
       metaHtml += `<div class=\"result-logo\"><img class=\"logo-print\" src=\"${logoUrl}\" alt=\"Internal Systems\"></div>`;
-      metaHtml += `<div class=\"print-meta\">SN/HostName: ${escapeHTML(serial)}</div>`;
       resultDiv.innerHTML = `
         ${metaHtml}
         <img src="${barcodeURL}" alt="Código de Barras">
